@@ -10,6 +10,7 @@ reading image texture as text.
 import logging
 import os
 import re
+import shutil
 from typing import List
 
 import cv2
@@ -19,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 _TESSERACT_CMD = os.environ.get(
     "TESSERACT_CMD",
-    r"C:\Program Files\Tesseract-OCR\tesseract.exe",
+    shutil.which("tesseract") or r"C:\Program Files\Tesseract-OCR\tesseract.exe",
 )
 
 _tesseract_available = False
@@ -36,7 +37,9 @@ except ImportError:
 
 def is_ocr_available() -> bool:
     """Check if the OCR engine is available."""
-    return _tesseract_available and os.path.exists(_TESSERACT_CMD)
+    return _tesseract_available and bool(_TESSERACT_CMD) and (
+        os.path.exists(_TESSERACT_CMD) or shutil.which(_TESSERACT_CMD) is not None
+    )
 
 
 def preprocess_for_ocr(image: np.ndarray) -> List[np.ndarray]:
